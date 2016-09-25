@@ -1,0 +1,56 @@
+swagger: '2.0'
+
+info:
+  version: "0.0.1"
+  title: Postman Boyan Checker
+
+host: 192.168.99.100:3000
+
+paths:
+  /insert:
+    put:
+      description: Insert boyan in database
+      parameters:
+        -
+          name: image_url
+          in: query
+          description: URL of image
+          required: true
+          type: string
+      responses:
+        200:
+          description: Sucessfuly inserted
+          schema:
+            type: object
+            properties:
+              image_hash:
+                type: string
+  
+  /lookup:
+    get:
+      description: Lookup boyan in database
+      parameters:
+        -
+          name: image_url
+          in: query
+          description: URL of Image
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful response
+          schema:
+            title: ArrayOfPersons
+            type: object
+            properties:
+              image_hash:
+                type: string
+              lookup_result:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    hash:
+                      type: string
+                    distance:
+                      type: number
