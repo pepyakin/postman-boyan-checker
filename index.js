@@ -12,7 +12,7 @@ try {
   db = hmsearch.openSync(DB_PATH, hmsearch.READWRITE);
 } catch (e) {
   console.log("cant open db, trying to init it first, e=" + e);
-  hmsearch.initSync(DB_PATH, 256, 5, 1000000);
+  hmsearch.initSync(DB_PATH, 256, 10, 1000000);
   db = hmsearch.openSync(DB_PATH, hmsearch.READWRITE);
 }
 
@@ -72,7 +72,9 @@ app.put('/insert', function (req, res) {
         if (err) {
           res.sendStatus(500);
         } else {
-          res.sendStatus(200);
+          res.json({
+            image_hash: image_hash
+          });
         }
       });
     }
