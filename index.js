@@ -1,38 +1,51 @@
 var express = require('express');
 var hmsearch = require('hmsearch');
 var request = require('request');
-var blockhash = require('blockhash');
-var getPixels = require("get-pixels");
+var pHash = require("phash");
+var tmp = require("tmp");
+var fs = require("fs");
 var app = express();
 
 DB_PATH = "/data/hashes.kch";
+BITS_PER_HASH = 64;
 
 var db;
 try {
   db = hmsearch.openSync(DB_PATH, hmsearch.READWRITE);
 } catch (e) {
   console.log("cant open db, trying to init it first, e=" + e);
-  hmsearch.initSync(DB_PATH, 256, 10, 1000000);
+  hmsearch.initSync(DB_PATH, BITS_PER_HASH, 15, 1000000);
   db = hmsearch.openSync(DB_PATH, hmsearch.READWRITE);
 }
 
 function get_image_blockhash(image_url, cb) {
-  getPixels(image_url, function(pixels_err, pixels) {
-    if (pixels_err) {
-      cb(pixels_err, null);
-    } else {
-      var image_data = {
-        width: pixels.shape[0],
-        height: pixels.shape[1],
-        data: pixels.data
-      };
-      try {
-        var image_hash = blockhash.blockhashData(image_data, 16, 1);
-        console.log("image_hash=" + image_hash);
-        cb(null, image_hash);
-      } catch (e) {
-        cb(e, null);
-      }
+  tmp.file({keep: true}, function(err, path, fd, cleanup) {
+    try {
+      if (err) throw err;
+      request(image_url)
+        .pipe(fs.createWriteStream(path))
+        .on('finish', function(s) {
+          pHash.imageHash(path, function(err, hash) {
+            cleanup();
+            if (err) {
+              cb(err, null);
+            } else {
+              // weirdly, hash is string containing integer
+              var int_hash = parseInt(hash);
+              var hex_hash = ("000000000000000" + int_hash.toString(16)).substr(-16);
+              console.log("hex_hash=" + hex_hash);
+              cb(null, hex_hash);
+            }
+          });
+        })
+        .on('error', function(e) {
+          cleanup();
+          cb(e, null);
+        });
+    } 
+    catch (e) {
+      cleanup();
+      cb(e, null);
     }
   });
 }
@@ -52,7 +65,12 @@ app.get('/lookup', function (req, res) {
         } else {
           res.json({
             image_hash: image_hash,
-            lookup_result: lookup_result
+            lookup_result: lookup_result.map(function(it) {
+              return {
+                image_hash: it.hash,
+                distance: it.distance / BITS_PER_HASH,
+              };
+            })
           });
         }
       });
@@ -66,10 +84,12 @@ app.put('/insert', function (req, res) {
 
   get_image_blockhash(image_url, function(err, image_hash) {
     if (err) {
+      console.log("/insert, err=" + err);
       res.sendStatus(500);
     } else {
       db.insert(image_hash, function(err) {
         if (err) {
+          console.log("insert hash, image_hash=" + image_hash + ", err=" + err);
           res.sendStatus(500);
         } else {
           res.json({

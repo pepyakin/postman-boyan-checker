@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 
 RUN \
   apt-get update && \
-  apt-get install -y libkyotocabinet-dev kyotocabinet-utils build-essential nodejs nodejs-dev npm && \
+  apt-get install -y libkyotocabinet-dev kyotocabinet-utils build-essential nodejs nodejs-dev npm cimg-dev libphash0-dev libmagickcore-dev && \
   ln -s `which nodejs` /usr/bin/node
 
 VOLUME /data
