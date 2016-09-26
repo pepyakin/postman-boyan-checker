@@ -11,9 +11,7 @@
   "dependencies": {
     "express": "^4.14.0",
     "hmsearch": "0.1.0",
-    "blockhash": "0.2.0",
-    "png-js": "0.1.1",
-    "jpeg-js": "0.2.0",
-    "get-pixels": "3.3.0" 
+    "phash": "0.0.5",
+    "tmp": "0.0.29"
   }
 }
