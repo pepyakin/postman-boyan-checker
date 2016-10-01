@@ -14,7 +14,7 @@ try {
   db = hmsearch.openSync(DB_PATH, hmsearch.READWRITE);
 } catch (e) {
   console.log("cant open db, trying to init it first, e=" + e);
-  hmsearch.initSync(DB_PATH, BITS_PER_HASH, 15, 1000000);
+  hmsearch.initSync(DB_PATH, BITS_PER_HASH, 7, 1000000);
   db = hmsearch.openSync(DB_PATH, hmsearch.READWRITE);
 }
 
