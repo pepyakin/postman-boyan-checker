@@ -68,7 +68,7 @@ GET /lookup?image_url=<image_url> HTTP/1.1
 
 Запрос: 
 ```
-POST /insert?image_url=<image_url> HTTP/1.1
+PUT /insert?image_url=<image_url> HTTP/1.1
 ```
 где `<image_url>` — URL изображения для вставки.
 
